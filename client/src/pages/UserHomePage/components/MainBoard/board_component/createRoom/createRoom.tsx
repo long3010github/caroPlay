@@ -2,6 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
 import styled from 'styled-components';
+import { socketHelper } from '../../../../../../helpers/socketHelper';
+import { RootState } from '../../../../../../store';
+import { setCurrentRoom } from '../../../../../../store/game/slice';
+import { useAppDispatch, useAppSelector } from '../../../../../../store/hook';
+import { Player, Room } from '../../interface/room.interface';
 
 const Container = styled.div`
   padding: 10px 10px;
@@ -65,12 +70,17 @@ interface PropTypes {
   // changeToRoom:
 }
 
-interface CreateRoomResult {
-  success: boolean;
-  errorMessage: string;
-}
+type CreateRoomResult =
+  | {
+      data: undefined;
+      errorMessage: string;
+    }
+  | { errorMessage: undefined; data: Room };
 
 export const CreateRoom = ({ socket }: PropTypes) => {
+  const me = useAppSelector((state: RootState) => state.auth.userInfo);
+  const dispatch = useAppDispatch();
+
   const roomNameRef = useRef<HTMLInputElement>(null);
   const roomPasswordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | undefined>();
@@ -92,15 +102,20 @@ export const CreateRoom = ({ socket }: PropTypes) => {
       socket?.emit(
         'create_room',
         { roomName, roomPassword },
-        ({ success, errorMessage }: CreateRoomResult) => {
+        (result: CreateRoomResult) => {
           console.log(isMounted);
           if (!isMounted) return;
-          if (!success) setError(errorMessage);
+          if (result.errorMessage) return setError(result.errorMessage);
+          if (result.data) {
+            const myRole = socketHelper.getMyRole(me, result.data);
+            if (!myRole) return;
+            dispatch(setCurrentRoom({ room: result.data, me: myRole }));
+          }
         }
       );
     }
     setTimeout(() => {
-      setError(undefined);
+      if (isMounted) setError(undefined);
     }, 3000);
   };
   return (

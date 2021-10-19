@@ -5,7 +5,7 @@ import {
   Right,
   TopLeft,
   BottomLeft,
-} from './components/elementIndex';
+} from './elementIndex';
 import { GlobalChat } from './components/GlobalChat';
 import { MainBoard } from './components/MainBoard';
 import { UserBriefInfo } from './components/UserBriefInfo';

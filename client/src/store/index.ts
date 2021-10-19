@@ -1,7 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from './auth/slice';
+import { gameSlice } from './game/slice';
 import { modalSlide } from './Modal/slice';
 import { socketSlice } from './socket/slice';
+import { timerSlice } from './timer/slice';
 // ...
 
 export const store = configureStore({
@@ -9,6 +11,8 @@ export const store = configureStore({
     modal: modalSlide.reducer,
     auth: authSlice.reducer,
     socket: socketSlice.reducer,
+    game: gameSlice.reducer,
+    timer: timerSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

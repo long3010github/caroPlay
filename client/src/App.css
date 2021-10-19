@@ -5,6 +5,7 @@
   font-family: sans-serif;
   height: 100%;
   width: 100%;
+  /* min-width: 1000px; */
 }
 
 #modal-root {

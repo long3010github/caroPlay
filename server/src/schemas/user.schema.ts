@@ -20,6 +20,10 @@ export class User {
   @Exclude()
   currentRoom?: string;
 
+  @Prop({ default: [] })
+  @Exclude()
+  currentSocketInstances: string[];
+
   // @Prop()
   // breed: string;
 }

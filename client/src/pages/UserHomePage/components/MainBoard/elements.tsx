@@ -1,4 +1,9 @@
+import React, { useState } from 'react';
+import { Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { CreateRoom } from './board_component/createRoom/createRoom';
+import { RoomList } from './board_component/roomList/roomList';
+// import { BoardContent } from './board_content';
 
 export const Container = styled.div`
   display: flex;
@@ -7,14 +12,14 @@ export const Container = styled.div`
   border: 1px solid black;
 `;
 
-export const Header = styled.div`
+const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   height: fit-content;
 `;
 
-export const HeaderChoice = styled.div`
+const HeaderChoice = styled.div`
   text-align: center;
   padding: 5px 10px;
   font-size: 20px;
@@ -25,24 +30,63 @@ export const HeaderChoice = styled.div`
   cursor: pointer;
 `;
 
-export const RoomContainer = styled.div`
+const BoardContent = styled.div`
   padding: 10px 10px;
-  border: 1px solid red;
+
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  width: 100%;
+  justify-content: center;
 `;
 
-export const Left = styled.div`
-  padding: 5px 5px;
-  border: 1px solid yellowgreen;
-`;
+interface PropTypes {
+  socket?: Socket;
+  isLoading: boolean;
+  errorMessage?: string;
+}
 
-export const Right = styled.div`
-  padding: 5px 5px;
-  border: 1px solid blue;
-`;
+export const BoardElement = ({
+  socket,
+  isLoading,
+  errorMessage,
+}: PropTypes) => {
+  const [boardState, setBoardState] = useState<string>('roomList');
 
-export const BoardContainer = styled.div``;
+  let displayComponent;
+  switch (boardState) {
+    case 'roomList':
+      displayComponent = <RoomList socket={socket} />;
+      break;
+    case 'createRoom':
+      displayComponent = <CreateRoom socket={socket} />;
+      break;
+    default:
+      displayComponent = <RoomList socket={socket} />;
+  }
+
+  return (
+    <>
+      <Header>
+        <HeaderChoice
+          onClick={() => {
+            setBoardState('roomList');
+          }}
+        >
+          Rooms
+        </HeaderChoice>
+        <HeaderChoice
+          onClick={() => {
+            setBoardState('createRoom');
+          }}
+        >
+          Create room
+        </HeaderChoice>
+      </Header>
+      {isLoading ? (
+        <div>Loading</div>
+      ) : errorMessage ? (
+        <div>{errorMessage}</div>
+      ) : (
+        <BoardContent>{displayComponent}</BoardContent>
+      )}
+    </>
+  );
+};
