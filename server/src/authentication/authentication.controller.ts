@@ -23,6 +23,7 @@ import { RequestWithRefreshToken } from './interface/requestWithRefreshToken';
 import { RefreshTokenPayload } from './interface/refresh-token.payload';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { AuthGuard } from '@nestjs/passport';
+import { UserService } from 'src/user/user.service';
 
 @Controller('auth')
 @UseInterceptors(MongooseClassSerializerInterceptor(User))
@@ -30,6 +31,7 @@ export class AuthenticationController {
   constructor(
     private authenticationService: AuthenticationService,
     private refreshTokenService: RefreshTokenService,
+    private userService: UserService,
   ) {}
 
   @Post('login')
@@ -79,6 +81,7 @@ export class AuthenticationController {
       accessTokenCookie,
       refreshTokenCookie,
     ]);
+    await this.userService.updateLeaderBoardsAfterRegister(userData);
     return userData;
   }
 

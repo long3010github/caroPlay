@@ -11,6 +11,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { RefreshTokenModule } from 'src/refresh-token/refresh-token.module';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     JwtModule.register({}),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     RefreshTokenModule,
+    UserModule,
+    RedisModule,
   ],
   providers: [
     AuthenticationService,

@@ -1,19 +1,56 @@
-import { Get, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/schemas/user.schema';
+import { User, UserDocument } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
 import { UserRegisterDTO } from './dto/user-register.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { RefreshToken } from 'src/schemas/refreshToken.schema';
 import { CreateRefreshTokenDTO } from './dto/refreshToken.dto';
+import { RedisService } from 'src/redis/redis.service';
+import { ILeaderBoard } from 'src/gateway/interface/leaderBoard';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    // @InjectModel(User.name) private userModel: Model<User>,
+    @Inject('USER_MODEL')
+    private userModel: Model<User>,
     private configService: ConfigService,
+    private redisService: RedisService,
   ) {}
+
+  public async getLeaderBoard() {
+    const leaderBoard = await this.userModel
+      .find()
+      .sort({ win: 'desc' })
+      .limit(15)
+      .select('username win lose -_id')
+      .exec();
+    return leaderBoard;
+  }
+
+  public async updateLeaderBoardsAfterRegister(user: UserDocument) {
+    const leaderBoards = await this.redisService.cacheManager.get<
+      ILeaderBoard[]
+    >('game_leader_board');
+    leaderBoards.push({
+      username: user.username,
+      win: user.win,
+      lose: user.lose,
+    });
+    await this.redisService.cacheManager.set(
+      'game_leader_board',
+      leaderBoards.slice(0, 15),
+    );
+  }
 
   public async createUser(userRegistrationData: UserRegisterDTO) {
     const { username, password } = userRegistrationData;
@@ -52,6 +89,11 @@ export class UserService {
     return user;
   }
 
+  public async getUserWithUsername(username: string) {
+    const user = await this.userModel.findOne({ username });
+    return user;
+  }
+
   private async verifyPassword(
     plainTextPassword: string,
     hashedPassword: string,
@@ -60,4 +102,8 @@ export class UserService {
     if (!isMatch)
       throw new HttpException('Invalid credential', HttpStatus.UNAUTHORIZED);
   }
+
+  // public async getLeaderboard() {
+  //   const leaderboard
+  // }
 }

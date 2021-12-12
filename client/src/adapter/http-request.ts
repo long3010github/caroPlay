@@ -19,17 +19,15 @@ interface ErrorType {
 interface LoginResponse {
   username: string;
   id: string;
-  level?: number;
-  win?: number;
-  lose?: number;
+  win: number;
+  lose: number;
 }
 
 interface RegisterResponse {
   username: string;
   id: string;
-  win?: string;
-  lose?: string;
-  level?: number;
+  win: number;
+  lose: number;
 }
 
 interface IUserInfo extends LoginResponse {}

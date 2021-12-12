@@ -7,16 +7,21 @@ import {
   RefreshToken,
   RefreshTokenSchema,
 } from 'src/schemas/refreshToken.schema';
+import { DatabaseModule } from 'src/database/database.module';
+import { userProvider } from 'src/schemas/user.provider';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: RefreshToken.name, schema: RefreshTokenSchema },
-    ]),
+    // MongooseModule.forFeature([
+    //   { name: User.name, schema: UserSchema },
+    //   { name: RefreshToken.name, schema: RefreshTokenSchema },
+    // ]),
+    DatabaseModule,
+    RedisModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, ...userProvider],
   exports: [UserService],
 })
 export class UserModule {}

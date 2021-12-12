@@ -60,7 +60,9 @@ const RegisterForm = () => {
     if (data) {
       // hide the modal and continue
       dispatch(hide());
-      return dispatch(setUser({ username: data.username, level: 5 }));
+      return dispatch(
+        setUser({ username: data.username, win: data.win, lose: data.lose })
+      );
     }
   };
 
@@ -123,7 +125,9 @@ export const LoginForm = () => {
       // return setRequestError(error.message);
     }
     if (data) {
-      return dispatch(setUser({ username: data.username, level: 5 }));
+      return dispatch(
+        setUser({ username: data.username, win: data.win, lose: data.lose })
+      );
     }
   };
   return (
@@ -139,9 +143,9 @@ export const LoginForm = () => {
           <FormInputField type="password" ref={passwordRef} />
         </FormInputSection>
         <FormButton type="submit">Login</FormButton>
-        <FormLinkContainer>
+        {/* <FormLinkContainer>
           <FormLink to="password_recover">Forgot password?</FormLink>
-        </FormLinkContainer>
+        </FormLinkContainer> */}
         <FormLineBreak />
         <FormButton
           type="button"

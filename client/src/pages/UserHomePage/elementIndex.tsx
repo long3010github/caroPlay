@@ -19,6 +19,9 @@ export const Left = styled.div`
 export const TopLeft = styled.div`
   padding: 3px 5px;
   height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 export const BottomLeft = styled.div`

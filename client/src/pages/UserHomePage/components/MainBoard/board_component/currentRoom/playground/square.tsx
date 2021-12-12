@@ -5,13 +5,20 @@ import { useAppDispatch } from '../../../../../../../store/hook';
 
 const Square = styled.div`
   border: 1px solid black;
-  width: 40px;
-  height: 100%;
-  padding: 2px 2px;
+  width: 35px;
+  height: 35px;
+  padding: 1px 1px;
   text-align: center;
   font-weight: bold;
   font-size: 30px;
-  background: ${(props) => (props.theme.highLight ? '#d78ed4' : 'white')};
+  background: ${(props) => {
+    if (props.theme.streak) return '#c96284';
+    if (props.theme.highLight) return '#be9bbc';
+  }};
+  color: ${(props) => {
+    if (props.theme.main === 1) return 'blue';
+    if (props.theme.main === 0) return 'black';
+  }};
 
   :hover {
     background: ${(props) => {
@@ -27,6 +34,7 @@ interface PropTypes {
   value: 1 | 2 | null;
   handleMove: (xIndex: number, yIndex: number) => void;
   isLastMove: boolean;
+  isStreak: boolean;
 }
 
 export const GameSquare = ({
@@ -35,6 +43,7 @@ export const GameSquare = ({
   value,
   handleMove,
   isLastMove,
+  isStreak,
 }: PropTypes) => {
   const [isHighlight, setIsHighLight] = useState<boolean>(false);
 
@@ -50,7 +59,9 @@ export const GameSquare = ({
   }, [value]);
   // const [isTicked, setIsTicked] = useState<boolean>(false);
   return (
-    <ThemeProvider theme={{ main: value, highLight: isHighlight }}>
+    <ThemeProvider
+      theme={{ main: value, highLight: isHighlight, streak: isStreak }}
+    >
       <Square
         onClick={() => {
           if (value) return;

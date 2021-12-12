@@ -3,23 +3,28 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../index';
 
 export interface TimerType {
-  time: number;
+  remain: number;
   isActive: boolean;
 }
 // Define a type for the slice state
 interface TimerState {
   matchStart: TimerType;
   matchMove: TimerType;
+  matchFinish: TimerType;
 }
 
 // Define the initial state using that type
 const initialState: TimerState = {
   matchStart: {
-    time: 3,
+    remain: 3,
     isActive: false,
   },
   matchMove: {
-    time: 15,
+    remain: 15,
+    isActive: false,
+  },
+  matchFinish: {
+    remain: 5,
     isActive: false,
   },
 };
@@ -31,37 +36,30 @@ export const timerSlice = createSlice({
   reducers: {
     setActiveTimer: (
       state,
-      action: PayloadAction<'matchStart' | 'matchMove'>
+      action: PayloadAction<{
+        type: 'matchStart' | 'matchMove' | 'matchFinish';
+        remain: number;
+      }>
     ) => {
-      const type = action.payload;
-      state[type] = { ...initialState[type], isActive: true };
+      const { type, remain } = action.payload;
+      state[type] = { ...initialState[type], isActive: true, remain };
     },
     setTimerAfterTick: (
       state,
-      action: PayloadAction<'matchStart' | 'matchMove'>
+      action: PayloadAction<'matchStart' | 'matchMove' | 'matchFinish'>
     ) => {
       const type = action.payload;
-      state[type].time -= 1;
-      if (state[type].time === 0) state[type].isActive = false;
+      // state[type].remain -= 1;
+      // console.log(state[type].remain);
+      if (state[type].remain === 1) {
+        state[type].isActive = false;
+        return;
+      }
+      state[type].remain -= 1;
     },
     resetTimer: (state) => ({
       ...initialState,
     }),
-    // setMatchMoveTimerAfterTick: (state) => {
-    //   state.matchMove.time -= 1;
-    //   if (state.matchMove.time === 0) state.matchMove.isActive = false;
-    // },
-    // setTimerCountdown: (state) => ({
-    //   ...state,
-    //   type: {
-    //     ...state.type,
-    //     time,
-    //   },
-    // }),
-    // clearUser: (state) => ({
-    //   isAuth: false,
-    // }),
-    // Use the PayloadAction type to declare the contents of `action.payload`
   },
 });
 

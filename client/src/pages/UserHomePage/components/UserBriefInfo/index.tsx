@@ -1,7 +1,7 @@
 import React from 'react';
 import { RootState } from '../../../../store';
 import { useAppSelector } from '../../../../store/hook';
-import { Container, Left, Right, Username, Level } from './elements';
+import { Container, Left, Right, Username, Win, Lose } from './elements';
 import avatar from '../../../../assets/profile.jpg';
 
 export const UserBriefInfo = (): JSX.Element => {
@@ -12,7 +12,8 @@ export const UserBriefInfo = (): JSX.Element => {
       <Left src={avatar} />
       <Right>
         <Username>{userInfo.username}</Username>
-        <Level>{`Level: ${userInfo.level}`}</Level>
+        <Win>{`Win: ${userInfo.win}`}</Win>
+        <Lose>{`Lose: ${userInfo.lose}`}</Lose>
       </Right>
     </Container>
   );

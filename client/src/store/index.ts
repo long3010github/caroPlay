@@ -1,6 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from './auth/slice';
+import { chatSlice } from './chat/slice';
 import { gameSlice } from './game/slice';
+import { leaderBoardsSlice } from './leaderboards/slice';
 import { modalSlide } from './Modal/slice';
 import { socketSlice } from './socket/slice';
 import { timerSlice } from './timer/slice';
@@ -13,6 +15,8 @@ export const store = configureStore({
     socket: socketSlice.reducer,
     game: gameSlice.reducer,
     timer: timerSlice.reducer,
+    chat: chatSlice.reducer,
+    leaderBoards: leaderBoardsSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

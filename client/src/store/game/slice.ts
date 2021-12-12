@@ -32,7 +32,7 @@ interface RoomChange {
   type: string;
 }
 
-interface Move {
+export interface Move {
   xIndex: number;
   yIndex: number;
 }
@@ -104,6 +104,17 @@ export const gameSlice = createSlice({
       currentMatchState.lastMove = { xIndex, yIndex };
       state.currentMatch = currentMatchState;
     },
+    setMatchResult: (
+      state,
+      action: PayloadAction<{ winner: 1 | 2; streak: Move[]; reason?: string }>
+    ) => {
+      const currentMatchState: OnGoingMatch | undefined = JSON.parse(
+        JSON.stringify(state.currentMatch)
+      );
+      if (!currentMatchState) return;
+      currentMatchState.result = action.payload;
+      state.currentMatch = currentMatchState;
+    },
     // Use the PayloadAction type to declare the contents of `action.payload`
   },
 });
@@ -114,6 +125,7 @@ export const {
   setCurrentRoom,
   setMatchState,
   setMatchStateAfterMove,
+  setMatchResult,
   clearCurrentRoom,
 } = gameSlice.actions;
 

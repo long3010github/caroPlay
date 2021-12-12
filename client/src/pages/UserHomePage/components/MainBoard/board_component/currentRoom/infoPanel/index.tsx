@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import styled from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import { RootState } from '../../../../../../../store';
 import { ICurrentRoom } from '../../../../../../../store/game/slice';
 import {
@@ -11,6 +11,13 @@ import {
   setActiveTimer,
   setTimerAfterTick,
 } from '../../../../../../../store/timer/slice';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+`;
 
 const RoomName = styled.div`
   text-align: center;
@@ -39,11 +46,13 @@ const PlayerList = styled.div`
 
 const RoomPlayer = styled.div`
   height: fit-content;
-  padding: 5px 5px;
+  /* padding: 5px 5px; */
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
+  /* border: 1px solid salmon; */
+  color: ${(props) => props.theme.nextTurn && 'red'};
 `;
 
 const JoinButton = styled.button`
@@ -52,7 +61,7 @@ const JoinButton = styled.button`
   height: fit-content;
   width: fit-content;
   cursor: pointer;
-  margin-left: 30px;
+  /* margin-left: 30px; */
 
   :hover {
     background: #c0a9be;
@@ -60,27 +69,30 @@ const JoinButton = styled.button`
 `;
 
 const PlayerRow = styled.div`
+  padding: 0px 20px;
   display: flex;
   justify-content: space-between;
   height: fit-content;
   width: fit-content;
+  /* border: 1px solid blue; */
 `;
 
 const PlayerLabel = styled.span`
-  font-size: 25px;
+  font-size: 20px;
   height: fit-content;
   width: fit-content;
+  margin-right: 50px;
 `;
 
 const PlayerName = styled.div`
-  font-size: 25px;
+  font-size: 20px;
   height: fit-content;
   width: fit-content;
-  margin-left: 30px;
+  /* margin-left: 60px; */
 `;
 
 const PlayerReadyState = styled.div`
-  font-size: 25px;
+  font-size: 20px;
   height: fit-content;
   width: fit-content;
   margin-right: 30px;
@@ -91,6 +103,22 @@ const PlayerTurnTimer = styled.div`
   height: fit-content;
   width: fit-content;
   margin-right: 30px;
+`;
+
+const MatchResult = styled.div`
+  font-size: 25px;
+  height: fit-content;
+  width: fit-content;
+  color: red;
+  text-align: center;
+`;
+
+const Reason = styled.div`
+  font-size: 25px;
+  height: fit-content;
+  width: fit-content;
+  color: red;
+  text-align: center;
 `;
 
 const RoomViewerList = styled.div`
@@ -160,19 +188,19 @@ export const RoomInfoPanel = ({ currentRoom, socket }: PropTypes) => {
 
   const handleRequestToBePlayer = (pos: number) => {
     socket?.emit('request_to_be_player', pos, (success: boolean) => {
-      console.log(success);
+      // console.log(success);
     });
   };
 
   const handleRequestToBeViewer = () => {
     socket?.emit('request_to_be_viewer', (success: boolean) => {
-      console.log(success);
+      // console.log(success);
     });
   };
 
   const handleChangeReadyStatus = () => {
     socket?.emit('ready_status_change', (success: boolean) => {
-      console.log(success);
+      // console.log(success);
     });
   };
 
@@ -189,33 +217,39 @@ export const RoomInfoPanel = ({ currentRoom, socket }: PropTypes) => {
         (player) => player.pos === index + 1
       );
       const key = `player${index}`;
+      // const isInMatch = !!currentMatch
+      const isNextTurn =
+        currentMatch &&
+        !!(currentMatch.nextTurn === index + 1 && matchMoveTimer.isActive);
       return (
-        <RoomPlayer key={key}>
-          <PlayerRow>
-            <PlayerLabel>
-              Player
-              {` ${index + 1}`}
-            </PlayerLabel>
-            {existPlayer ? (
-              <PlayerName>
-                {existPlayer.name === me.name ? 'Me' : existPlayer.name}
-              </PlayerName>
+        <ThemeProvider theme={{ nextTurn: isNextTurn }} key={key}>
+          <RoomPlayer>
+            <PlayerRow>
+              <PlayerLabel>
+                Player
+                {` ${index + 1}`}
+              </PlayerLabel>
+              {existPlayer ? (
+                <PlayerName>
+                  {existPlayer.name === me.name ? 'Me' : existPlayer.name}
+                </PlayerName>
+              ) : (
+                <JoinButton onClick={() => handleRequestToBePlayer(index + 1)}>
+                  Be a player
+                </JoinButton>
+              )}
+            </PlayerRow>
+            {currentMatch ? (
+              isNextTurn ? (
+                <PlayerTurnTimer>{matchMoveTimer.remain} </PlayerTurnTimer>
+              ) : null
             ) : (
-              <JoinButton onClick={() => handleRequestToBePlayer(index + 1)}>
-                Be a player
-              </JoinButton>
+              <PlayerReadyState>
+                {existPlayer && (existPlayer.isReady ? 'Ready' : 'Not ready')}
+              </PlayerReadyState>
             )}
-          </PlayerRow>
-          {currentMatch ? (
-            currentMatch.nextTurn === index + 1 && matchMoveTimer.isActive ? (
-              <PlayerTurnTimer>{matchMoveTimer.time} </PlayerTurnTimer>
-            ) : null
-          ) : (
-            <PlayerReadyState>
-              {existPlayer && (existPlayer.isReady ? 'Ready' : 'Not ready')}
-            </PlayerReadyState>
-          )}
-        </RoomPlayer>
+          </RoomPlayer>
+        </ThemeProvider>
       );
     });
 
@@ -239,10 +273,27 @@ export const RoomInfoPanel = ({ currentRoom, socket }: PropTypes) => {
     };
   }, [matchMoveTimer.isActive]);
 
+  let winner;
+  if (currentMatch && currentMatch.result) {
+    winner = currentRoom.room.player.find(
+      (player) => player.pos === currentMatch.result?.winner
+    )?.name;
+  }
+
   return (
-    <>
+    <Container>
       <RoomName>{`Room: ${currentRoom.room.name}`}</RoomName>
       <PlayerList>{playerList}</PlayerList>
+      {currentMatch && currentMatch.result && (
+        <>
+          <MatchResult>
+            {winner === me.name ? 'You win' : `Player ${winner} win`}
+          </MatchResult>
+          {currentMatch.result.reason && (
+            <Reason>{currentMatch.result.reason}</Reason>
+          )}
+        </>
+      )}
       {!currentMatch && 'pos' in me ? (
         <>
           <ReadyButton
@@ -253,13 +304,15 @@ export const RoomInfoPanel = ({ currentRoom, socket }: PropTypes) => {
           >
             {me.isReady ? 'Not ready' : 'Ready'}
           </ReadyButton>
-          <BeViewerButton
-            onClick={() => {
-              handleRequestToBeViewer();
-            }}
-          >
-            Be a viewer
-          </BeViewerButton>
+          {!me.isReady && (
+            <BeViewerButton
+              onClick={() => {
+                handleRequestToBeViewer();
+              }}
+            >
+              Be a viewer
+            </BeViewerButton>
+          )}
         </>
       ) : null}
       <LeaveButton
@@ -270,6 +323,6 @@ export const RoomInfoPanel = ({ currentRoom, socket }: PropTypes) => {
         Leave
       </LeaveButton>
       <RoomViewerList>{viewerList}</RoomViewerList>
-    </>
+    </Container>
   );
 };

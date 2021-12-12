@@ -12,8 +12,8 @@ import { RoomInfoPanel } from './infoPanel';
 import { GameBoard } from './playground/matchBoard';
 
 const Container = styled.div`
-  padding: 10px 10px;
-  border: 1px solid red;
+  /* padding: 10px 10px; */
+  /* border: 1px solid red; */
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -23,8 +23,8 @@ const Container = styled.div`
 `;
 
 const Left = styled.div`
-  padding: 5px 5px;
-  border: 1px solid yellowgreen;
+  /* padding: 5px 5px; */
+  /* border: 1px solid yellowgreen; */
 `;
 
 const Playground = styled.div`
@@ -36,12 +36,17 @@ const Playground = styled.div`
 
 const Right = styled.div`
   padding: 5px 5px;
-  border: 1px solid blue;
+  border-left: 1px solid black;
+  /* border: 1px solid blue; */
   width: 70%;
   display: flex;
   flex-direction: column;
   align-items: center;
   /* justify-content: space-between; */
+
+  /* @media screen and (max-width: 1000px) {
+    display: none;
+  } */
 `;
 
 interface PropTypes {
@@ -66,9 +71,6 @@ export const CurrentRoom = ({ socket, currentRoom }: PropTypes) => {
     }
     return () => {
       if (matchStartInterval) clearInterval(matchStartInterval);
-      if (matchStartTimer.isActive) {
-        dispatch(setActiveTimer('matchMove'));
-      }
     };
   }, [matchStartTimer.isActive]);
 
@@ -77,7 +79,9 @@ export const CurrentRoom = ({ socket, currentRoom }: PropTypes) => {
       <Left>
         <Playground>
           {matchStartTimer.isActive ? (
-            <div>The match will begin after {matchStartTimer.time} second</div>
+            <div>
+              The match will begin after {matchStartTimer.remain} second
+            </div>
           ) : (
             currentMatch && (
               <GameBoard currentMatch={currentMatch} socket={socket} />

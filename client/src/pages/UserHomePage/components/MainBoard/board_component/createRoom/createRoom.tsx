@@ -103,7 +103,6 @@ export const CreateRoom = ({ socket }: PropTypes) => {
         'create_room',
         { roomName, roomPassword },
         (result: CreateRoomResult) => {
-          console.log(isMounted);
           if (!isMounted) return;
           if (result.errorMessage) return setError(result.errorMessage);
           if (result.data) {

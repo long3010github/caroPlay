@@ -25,7 +25,9 @@ export const useFetchInfo = () => {
         }
         if (data) {
           setIsLoading(false);
-          dispatch(setUser({ username: data.username, level: 5 }));
+          dispatch(
+            setUser({ username: data.username, win: data.win, lose: data.lose })
+          );
         }
       } catch (error: unknown) {
         setIsLoading(false);

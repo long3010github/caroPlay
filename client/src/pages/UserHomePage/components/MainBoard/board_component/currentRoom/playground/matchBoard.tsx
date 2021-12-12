@@ -21,7 +21,7 @@ const Board = styled.div`
 `;
 
 const Column = styled.div`
-  height: 40px;
+  height: 35px;
   min-width: 500px;
   display: flex;
   align-items: center;
@@ -35,18 +35,12 @@ interface PropTypes {
 
 export const GameBoard = ({ currentMatch, socket }: PropTypes) => {
   const dispatch = useAppDispatch();
-  const { matchMoves } = currentMatch;
+  const { matchMoves, result } = currentMatch;
 
   const handleMove = (xIndex: number, yIndex: number) => {
     if (matchMoves[xIndex][yIndex]) return;
     socket?.emit('match_move', { xIndex, yIndex }, (success: boolean) => {
       if (!success) return false;
-      // dispatch(
-      //   setMatchStateAfterMove({
-      //     player: 'long1235',
-      //     coordinate: { xIndex, yIndex },
-      //   })
-      // );
     });
   };
 
@@ -56,6 +50,14 @@ export const GameBoard = ({ currentMatch, socket }: PropTypes) => {
       <Column key={`column${colKey}`}>
         {column.map((squareVal, squareIndex) => {
           const squareKey = `${colKey},${squareIndex}`;
+          const isStreak = !!(
+            result &&
+            result.streak &&
+            result.streak.find(
+              (streak) =>
+                streak.xIndex === colIndex && streak.yIndex === squareIndex
+            )
+          );
           return (
             <GameSquare
               key={squareKey}
@@ -69,6 +71,7 @@ export const GameBoard = ({ currentMatch, socket }: PropTypes) => {
                     currentMatch.lastMove.yIndex === squareIndex
                   : false
               }
+              isStreak={isStreak}
             />
           );
         })}

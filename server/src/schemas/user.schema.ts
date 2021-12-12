@@ -24,6 +24,12 @@ export class User {
   @Exclude()
   currentSocketInstances: string[];
 
+  @Prop({ default: 0 })
+  win: number;
+
+  @Prop({ default: 0 })
+  lose: number;
+
   // @Prop()
   // breed: string;
 }

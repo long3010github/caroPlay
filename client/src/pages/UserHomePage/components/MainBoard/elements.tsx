@@ -39,15 +39,9 @@ const BoardContent = styled.div`
 
 interface PropTypes {
   socket?: Socket;
-  isLoading: boolean;
-  errorMessage?: string;
 }
 
-export const BoardElement = ({
-  socket,
-  isLoading,
-  errorMessage,
-}: PropTypes) => {
+export const BoardElement = ({ socket }: PropTypes) => {
   const [boardState, setBoardState] = useState<string>('roomList');
 
   let displayComponent;
@@ -80,13 +74,13 @@ export const BoardElement = ({
           Create room
         </HeaderChoice>
       </Header>
-      {isLoading ? (
+      {/* {isLoading ? (
         <div>Loading</div>
       ) : errorMessage ? (
         <div>{errorMessage}</div>
-      ) : (
-        <BoardContent>{displayComponent}</BoardContent>
-      )}
+      ) : ( */}
+      <BoardContent>{displayComponent}</BoardContent>
+      {/* )} */}
     </>
   );
 };

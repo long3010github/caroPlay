@@ -1,21 +1,31 @@
 import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { stat } from 'fs';
 import { useAppDispatch, useAppSelector } from '../store/hook';
 import { IOType } from '../store/socket/ioType';
-import { Room } from '../pages/UserHomePage/components/MainBoard/interface/room.interface';
+import {
+  OnGoingMatch,
+  Room,
+} from '../pages/UserHomePage/components/MainBoard/interface/room.interface';
 import {
   clearCurrentRoom,
   MatchState,
+  Move,
   setCurrentRoom,
+  setMatchResult,
   setMatchState,
   setMatchStateAfterMove,
   setRoomList,
   setRoomListAfterChange,
 } from '../store/game/slice';
-import { RetrieveCurrentRoom } from '../interface';
+import { ILeaderBoard, RetrieveCurrentRoom } from '../interface';
 import { RootState } from '../store';
 import { socketHelper } from '../helpers/socketHelper';
 import { resetTimer, setActiveTimer } from '../store/timer/slice';
+import { Message } from '../store/chat/interface';
+import { addMessage } from '../store/chat/slice';
+import { updateAfterMatchFinish } from '../store/auth/slice';
+import { setLeaderBoards } from '../store/leaderboards/slice';
 
 /**
  * Custom hook use to establish a websocket connection to server and register
@@ -28,15 +38,7 @@ export const useSocket = (ioType: IOType) => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [socket, setSocket] = useState<Socket | undefined>();
   const me = useAppSelector((state: RootState) => state.auth.userInfo);
-
-  const getMyRole = () => {
-    if (!me) return;
-    return me.username;
-  };
-
-  // const [roomList, setRoomList] = useState<Room[]>([]);
-  // const [currentRoom, setCurrentRoom] = useState<Room | undefined>();
-
+  const myRoom = useAppSelector((state: RootState) => state.game.currentRoom);
   const dispatch = useAppDispatch();
 
   const getIOConnection = () => {
@@ -82,7 +84,9 @@ export const useSocket = (ioType: IOType) => {
               dispatch(setCurrentRoom({ room, me: myRole }));
               if (room.onGoingMatch) {
                 dispatch(setMatchState(room.onGoingMatch));
-                dispatch(setActiveTimer('matchMove'));
+                if (room.onGoingMatch.timeout) {
+                  dispatch(setActiveTimer(room.onGoingMatch.timeout));
+                }
               }
             }
           );
@@ -99,31 +103,79 @@ export const useSocket = (ioType: IOType) => {
         dispatch(setCurrentRoom({ room, me: myRole }));
       });
 
+      ioInstance.on('sync_join', (room: Room) => {
+        const myRole = socketHelper.getMyRole(me, room);
+        if (!myRole) return;
+        dispatch(setCurrentRoom({ room, me: myRole }));
+        if (room.onGoingMatch) {
+          dispatch(setMatchState(room.onGoingMatch));
+          if (room.onGoingMatch.timeout) {
+            dispatch(setActiveTimer(room.onGoingMatch.timeout));
+          }
+        }
+      });
+
       ioInstance.on('match_move', (xIndex: number, yIndex: number) => {
-        console.log('receive move');
         dispatch(setMatchStateAfterMove({ xIndex, yIndex }));
-        dispatch(setActiveTimer('matchMove'));
+        dispatch(setActiveTimer({ type: 'matchMove', remain: 15 }));
       });
 
-      ioInstance.on('match_start', (matchStartState: MatchState) => {
-        dispatch(setActiveTimer('matchStart'));
-        dispatch(setMatchState(matchStartState));
+      ioInstance.on('match_start', (matchStartState: OnGoingMatch) => {
+        dispatch(setActiveTimer({ type: 'matchStart', remain: 3 }));
+        // dispatch(setMatchState(matchStartState));
       });
 
-      ioInstance.on('match_finish', (matchResult: 1 | 2) => {
-        console.log(matchResult);
+      ioInstance.on('match_start_cancel', () => {
         dispatch(setMatchState(undefined));
         dispatch(resetTimer());
       });
 
+      ioInstance.on('match_start_count', (matchStartState: OnGoingMatch) => {
+        dispatch(setActiveTimer({ type: 'matchMove', remain: 15 }));
+        dispatch(setMatchState(matchStartState));
+      });
+
+      ioInstance.on(
+        'match_result',
+        (matchResult: { winner: 1 | 2; streak: Move[]; reason?: string }) => {
+          dispatch(setMatchResult(matchResult));
+          dispatch(resetTimer());
+          dispatch(setActiveTimer({ type: 'matchFinish', remain: 5 }));
+        }
+      );
+
+      ioInstance.on('match_finish', (room: Room) => {
+        dispatch(setMatchState(undefined));
+        dispatch(resetTimer());
+        const myRole = socketHelper.getMyRole(me, room);
+        if (!myRole) return;
+        dispatch(setCurrentRoom({ room, me: myRole }));
+      });
+
       ioInstance.on('leave_room', () => {
         dispatch(clearCurrentRoom());
+        dispatch(setMatchState(undefined));
         dispatch(resetTimer());
+      });
+
+      ioInstance.on('global_chat', (message: Message) => {
+        dispatch(addMessage({ ...message }));
+      });
+
+      ioInstance.on(
+        'update_after_match',
+        (info: { win: number; lose: number; username: string }) => {
+          dispatch(updateAfterMatchFinish(info));
+        }
+      );
+
+      ioInstance.on('leaderBoard', (leaderBoard: ILeaderBoard[]) => {
+        dispatch(setLeaderBoards(leaderBoard));
       });
 
       return ioInstance;
     } catch (error: any) {
-      console.log(error);
+      console.trace(error);
       // setHasError(true);
     }
     // setIsLoading(false); // fix here
@@ -138,7 +190,6 @@ export const useSocket = (ioType: IOType) => {
       dispatch(clearCurrentRoom());
       dispatch(setMatchState(undefined));
       dispatch(resetTimer());
-      // setSocket(undefined);
     };
   }, []);
 

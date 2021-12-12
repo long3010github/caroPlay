@@ -17,7 +17,7 @@ export const AppRouter = () => {
   const { isLoading, errorCode } = useFetchInfo();
   if (isLoading) return <div>Loading</div>;
   if (errorCode && errorCode !== 401) {
-    console.log(errorCode);
+    // console.log(errorCode);
     return <div>Oops, server error</div>;
   }
   return (

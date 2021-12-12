@@ -30,6 +30,10 @@ export const Username = styled.div`
   text-align: left;
 `;
 
-export const Level = styled.div`
+export const Win = styled.div`
+  text-align: left;
+`;
+
+export const Lose = styled.div`
   text-align: left;
 `;

@@ -49,9 +49,9 @@ const NavBar = (): JSX.Element => {
               <NavMenuItem>
                 <NavMenuLink to="/">Home</NavMenuLink>
               </NavMenuItem>
-              <NavMenuItem>
+              {/* <NavMenuItem>
                 <NavMenuLink to="/leaderboard">Leaderboard</NavMenuLink>
-              </NavMenuItem>
+              </NavMenuItem> */}
               <NavMenuItem>
                 <NavMenuLink to="/tournament">Tournament</NavMenuLink>
               </NavMenuItem>

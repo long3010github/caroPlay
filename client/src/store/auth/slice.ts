@@ -1,5 +1,6 @@
 // import createSlice and type definition
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { userInfo } from 'os';
 import type { RootState } from '../index';
 import { UserInfo } from './interface';
 
@@ -26,11 +27,21 @@ export const authSlice = createSlice({
     clearUser: (state) => ({
       isAuth: false,
     }),
+    updateAfterMatchFinish: (
+      state,
+      action: PayloadAction<{ win: number; lose: number; username: string }>
+    ) => ({
+      ...state,
+      userInfo: {
+        ...state.userInfo,
+        ...action.payload,
+      },
+    }),
     // Use the PayloadAction type to declare the contents of `action.payload`
   },
 });
 
-export const { setUser, clearUser } = authSlice.actions;
+export const { setUser, clearUser, updateAfterMatchFinish } = authSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value;

@@ -18,7 +18,7 @@ const Container = styled.div`
 const Left = styled.div`
   padding: 5px 5px;
   height: 100%;
-  width: 50%;
+  width: 80%;
 
   display: flex;
   flex-direction: column;
@@ -30,6 +30,27 @@ const RoomName = styled.div`
   font-size: 25px;
   font-weight: bold;
   margin-bottom: 10px;
+`;
+
+const RoomPlayers = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+`;
+
+const Player = styled.div`
+  height: fit-content;
+  width: fit-content;
+  padding: 5px 5px;
+`;
+
+const Versus = styled.div`
+  height: fit-content;
+  width: fit-content;
+  margin-left: 40px;
+  margin-right: 40px;
+  font-size: 20px;
 `;
 
 const RoomAmount = styled.div`
@@ -66,12 +87,19 @@ interface PropTypes {
 
 export const RoomCard = ({ room, handleJoinRoom }: PropTypes) => {
   const roomPasswordRef = useRef<HTMLInputElement>(null);
+  const player1 = room.player.find((player) => player.pos === 1);
+  const player2 = room.player.find((player) => player.pos === 2);
 
   return (
     <Container key={room.name}>
       <Left>
         <RoomName>{`Room name: ${room.name}`}</RoomName>
-        <RoomAmount>{`Room amount: ${room.player.length}`}</RoomAmount>
+        {/* <RoomAmount>{`Room amount: ${room.player.length}`}</RoomAmount> */}
+        <RoomPlayers>
+          <Player>{player1 ? player1.name : '---'}</Player>
+          <Versus>vs</Versus>
+          <Player>{player2 ? player2.name : '---'}</Player>
+        </RoomPlayers>
       </Left>
       <Right>
         {room.havePassword && (

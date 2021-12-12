@@ -8,6 +8,11 @@ export interface Viewer {
   name: string;
 }
 
+interface Move {
+  xIndex: number;
+  yIndex: number;
+}
+
 export interface OnGoingMatch {
   matchMoves: (1 | 2 | null)[][];
   lastMove?: {
@@ -15,7 +20,15 @@ export interface OnGoingMatch {
     yIndex: number;
   };
   nextTurn: 1 | 2;
-  result?: 1 | 2;
+  result?: {
+    winner: 1 | 2;
+    streak?: Move[];
+    reason?: string;
+  };
+  timeout: {
+    type: 'matchStart' | 'matchMove' | 'matchFinish';
+    remain: number;
+  };
 }
 export interface Room {
   name: string;
